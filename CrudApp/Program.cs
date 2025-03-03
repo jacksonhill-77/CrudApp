@@ -7,19 +7,12 @@ public static class Program
 {
     public static void Main()
     {
-        
+        var fileService = new FileService();
+        var fileDbConnection = new FileDbConnection(fileService, FilePathsUtility.filePath);
+        var bookService = new BookService(fileDbConnection);
+        var userInputService = new UserInputService();
+        var interactionController = new InteractionController(bookService, userInputService);
+
+        interactionController.StartInteraction();
     }
 }
-
-// var filePath = FilePathsUtility.filePath;
-//
-// bool run = true;
-// Console.WriteLine("Connecting to database...");
-// var dapperConnect = new DapperDbConnection();
-// dapperConnect.ReadDatabase();
-//
-// Console.WriteLine("Welcome to the Simple Library.");
-
-
-//var interactionController = new InteractionController(new BookService(new FileService()));
-//interactionController.StartInteraction();

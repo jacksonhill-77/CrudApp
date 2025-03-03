@@ -8,9 +8,11 @@ namespace CrudApp;
 /// The role of the InteractionController is to implement all console read and write operations
 /// </summary>
 /// <param name="bookService">Class that implements IBookService</param>
-public class InteractionController(IBookService bookService, IFileService fileService)
+public class InteractionController(IBookService bookService, IUserInputService userInputService)
 {
     private readonly IBookService _bookService = bookService;
+    private readonly IUserInputService _userInputService = userInputService;
+
     private bool _isRunning = false;
 
     public void StartInteraction()
@@ -47,7 +49,8 @@ public class InteractionController(IBookService bookService, IFileService fileSe
 
     void DisplayBooks()
     {
-        PrintBooks(_bookService.FetchBooks());
+        //PrintBooks(_bookService.FetchBooks());
+        throw new NotImplementedException();
     }
 
     void AddBooks()

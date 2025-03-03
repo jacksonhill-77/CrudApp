@@ -8,9 +8,9 @@ public interface IBookService
 {
     (bool isSuccess, string? message) AddBook(Book book);
     void AddBooks(List<Book> books);
-    void RemoveBook(Book book);
-    List<Book> FetchBooks();
-    Book UpdateBook(Book book);
+    void RemoveBook(string titleOfBookToRemove);
+    (bool isSuccess, string? message, List<Book?>?) FetchBooks();
+    (bool isSuccess, string? message, Book? updatedBook) UpdateBook(string titleOfBookToUpdate, Book updatedBook);
 }
 
 public class BookService(IBookRepository bookRepository) : IBookService
@@ -27,18 +27,29 @@ public class BookService(IBookRepository bookRepository) : IBookService
         // // the below line should be in InteractionController
         // Console.WriteLine("Book removed.");
         // DisplayBooks();
-    }
-
-    public Book UpdateBook(Book book)
-    {
-        // // TODO: Move to Book UpdateBook(Book book)
-        // List<string> lines = _fileService.ReadLinesFromFile(filePath).ToList();
-        // var book = lines[bookIndex];
-        // var updatedBook = ChangeBookProperties(book);
-        // lines[bookIndex] = updatedBook;
-        //_fileService.WriteLinesToFile(lines, filePath);
         throw new NotImplementedException();
     }
+
+    //public (bool isSuccess, string? message) UpdateBook(string titleOfBookToUpdate, Book updatedBookProperties)
+    //{
+    //    var existingBook = _bookRepository.GetBookByTitle(titleOfBookToUpdate);
+
+    //    if (existingBook == null)
+    //    {
+    //        return (false, "Can't update book - doesn't exist");
+    //    }
+
+    //    // possibly put into own method - bookRepository.UpdateBook(titleOfBookToUpdate, updatedBook)
+    //    _bookRepository.RemoveBook(titleOfBookToUpdate);
+    //    _bookRepository.AddBook(updatedBookProperties.Author, updatedBookProperties.Title, updatedBookProperties.PublishYear);
+
+    //    // List<string> lines = _fileService.ReadLinesFromFile(filePath).ToList();
+    //    // var book = lines[bookIndex];
+    //    // var updatedBook = ChangeBookProperties(book);
+    //    // lines[bookIndex] = updatedBook;
+    //    //_fileService.WriteLinesToFile(lines, filePath);
+    //    return (true, null);
+    //}
 
     public (bool isSuccess, string message) AddBook(Book newBook)
     {
@@ -49,7 +60,7 @@ public class BookService(IBookRepository bookRepository) : IBookService
             return (false, "Already exists");
         }
         
-        _bookRepository.AddBook(newBook.Title, newBook.Author, newBook.PublishYear);
+        _bookRepository.AddBook(newBook);
         
         return (true, null)!;
     }
@@ -62,11 +73,36 @@ public class BookService(IBookRepository bookRepository) : IBookService
         //
         // // Should be in BookRepository
         // _fileService.WriteLinesToFile(books, filePath);
+        throw new NotImplementedException();
     }
 
-    public List<Book> FetchBooks()
+    public void RemoveBook(string titleOfBookToRemove)
     {
         throw new NotImplementedException();
+    }
+
+    public (bool isSuccess, string? message, List<Book?>?) FetchBooks()
+    {
+        var booksToFetch = _bookRepository.ReadDatabase();
+
+        if(booksToFetch == null)
+        {
+            return (false, "Book doesn't exist in library", null);
+        }
+
+        return (true, null, booksToFetch);
+    }
+
+    public (bool isSuccess, string? message, Book? updatedBook) UpdateBook(string titleOfBookToUpdate, Book updatedBook)
+    {
+        var bookToUpdate = _bookRepository.UpdateBook(titleOfBookToUpdate, updatedBook);
+
+        if (bookToUpdate.isSuccess == false)
+        {
+            return (false, "Book doesn't exist in library", null);
+        }
+
+        return (true, null, updatedBook);
     }
 
     // from BookHelper
@@ -90,6 +126,8 @@ public class BookService(IBookRepository bookRepository) : IBookService
         return updatedBook;
     }
 
+
+
     // from BookHelper
     public static List<String> ConvertBookListToJSON(List<Book> books)
     {
@@ -99,11 +137,6 @@ public class BookService(IBookRepository bookRepository) : IBookService
             output.Add(JsonConvert.SerializeObject(book));
         }
         return output;
-    }
-
-    public void ConvertLineToPropertiesList()
-    {
-
     }
 }
 

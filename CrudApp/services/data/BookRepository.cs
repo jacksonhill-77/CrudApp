@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using CrudApp.models;
+using Newtonsoft.Json;
 
 // when setting up database naming schemes, you can say all camelcase is converted to SQL conventions
 
@@ -18,19 +19,18 @@ namespace CrudApp.services.data
         // public unneccessary 
         // the classes based on this interface only return from database, rather than return and print. so readdatabase shouldn't be void 
         // the interface class should deal with the printing 
-        List<Book> ReadDatabase();
-        
+        List<Book?> ReadDatabase();
         Book? GetBookByTitle(string title);
-        void AddBook(string title, string? author, int publishYear);
-        void EditBook();
-        void RemoveBook();
+        (bool isSuccess, string? message) AddBook(Book book);
+        (bool isSuccess, string? message) UpdateBook(string titleOfBookToUpdate, Book updatedBook);
+        (bool isSuccess, string? message) RemoveBook(string titleOfBookToRemove);
     }
 
     public class LibraryContext : DbContext
     {
         public DbSet<Book> simple_library { get; set; }
 
-        public static String connectionString = "Server=localhost;User ID=sa;Password=9n8kZ81J0iuB;Initial Catalog=SIMPLE_LIBRARY;Integrated Security=false;TrustServerCertificate=True";
+        public static string connectionString = "Server=localhost;User ID=sa;Password=9n8kZ81J0iuB;Initial Catalog=SIMPLE_LIBRARY;Integrated Security=false;TrustServerCertificate=True";
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(connectionString);
@@ -38,88 +38,193 @@ namespace CrudApp.services.data
 
     }
 
-    public class DapperDbConnection : IBookRepository
+    public class FileDbConnection : IBookRepository
     {
-        public static String connectionString = "Server=localhost;User ID=sa;Password=9n8kZ81J0iuB;Initial Catalog=SIMPLE_LIBRARY;Integrated Security=false;TrustServerCertificate=True";
+        private IFileService _fileService;
+        private readonly string _filePath;
 
-        public List<Book> ReadDatabase()
+        public FileDbConnection(IFileService fileService, string filePath)
         {
-            using (var connection = new SqlConnection(connectionString))
-            {
-                var sql = "SELECT * FROM dbo.simple_library";
-
-                var books = connection.Query<Book>(sql).ToList();
-
-                foreach (Book book in books)
-                {
-                    Console.WriteLine(book.ToString());
-                }
-            }
-
-            return new List<Book>();
+            _fileService = fileService;
+            _filePath = filePath;
+        }
+        public List<Book?> ReadDatabase()
+        {
+            var listOfBookJSON = _fileService.ReadLinesFromFile(_filePath);
+            return ConvertListOfJSONToBooks(listOfBookJSON);
         }
 
-        public Book? GetBookByTitle(string title)
+        public (bool isSuccess, string? message) AddBook(Book book)
+        { 
+            try
+            {
+                string bookJSON = ConvertBookToJSON(book);
+                _fileService.WriteLineToFile(bookJSON, _filePath);
+                return (true, null);
+            } catch (Exception ex)
+            {
+                return (false, $"Adding book failed with message: {ex.Message}");
+            }
+        }
+
+        public (bool isSuccess, string? message) UpdateBook(string titleOfbookToUpdate, Book updatedBook)
+        {
+            var databaseWithoutBookResult = ReturnDatabaseWithoutBook(titleOfbookToUpdate);
+
+            if (databaseWithoutBookResult.databaseBooks == null)
+            {
+                return (false, databaseWithoutBookResult.message);
+            }
+
+            databaseWithoutBookResult.databaseBooks.Add(updatedBook);
+            WriteBooksToDatabase(databaseWithoutBookResult.databaseBooks);
+
+            return (true, null);
+
+        }
+
+        public (bool isSuccess, string? message) RemoveBook(string titleOfBookToUpdate)
+        {
+            var returnDatabaseResult = ReturnDatabaseWithoutBook(titleOfBookToUpdate);
+            WriteBooksToDatabase(returnDatabaseResult.databaseBooks);
+
+            return (true, "Book removed succesfully");
+        }
+
+        private void WriteBooksToDatabase(List<Book?> databaseBooks)
+        {
+            var writeableLines = ConvertListOfBooksToJSON(databaseBooks);
+            _fileService.WriteLinesToFile(writeableLines, _filePath);
+        }
+
+        private (List<Book?> databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
+        {
+            var databaseBooks = ReadDatabase();
+            var getBookResult = GetBookByTitle(databaseBooks, titleOfBook);
+
+            if (getBookResult.book == null)
+            {
+                return (null, getBookResult.message);
+            }
+            databaseBooks.Remove(GetBookByTitle(databaseBooks, titleOfBook).book);
+            return (databaseBooks, null);
+        }
+
+        private (Book? book, string? message) GetBookByTitle(List<Book> databaseBooks, string titleOfBook)
+        {
+            var book = databaseBooks.FirstOrDefault(book => book.Title == titleOfBook);
+
+            if (book == null)
+            {
+                return (null, "Could not find book title");
+            }
+
+            return (book, null);
+        }
+
+        public Book GetBookByTitle(string title)
         {
             throw new NotImplementedException();
         }
 
-        public void AddBook(string title, string? author, int publishYear)
+        private (bool isSuccess, string? message) RemoveBookFromList(List<Book> books, Book book)
         {
             throw new NotImplementedException();
         }
 
-        public void AddBook()
+        private List<Book?> ConvertListOfJSONToBooks(List<string> listOfBookJSON)
         {
-            using (var connection = new SqlConnection(connectionString))
+            var listOfBooks = new List<Book?>();
+
+            listOfBookJSON.ForEach(
+                book => listOfBooks.Add(ConvertJSONToBook(book)));
+
+            return listOfBooks;
+        }
+
+        private List<string> ConvertListOfBooksToJSON(List<Book> listOfBooks)
+        {
+            var listOfBookJSON = new List<string>();
+            foreach (var book in listOfBooks)
             {
-                // get value from user
-
-                var sql = "INSERT INTO dbo.simple_library";
-
-                var books = connection.Query<Book>(sql).ToList();
-
-                foreach (Book book in books)
-                {
-                    Console.WriteLine(book.ToString());
-                }
+                listOfBookJSON.Add(ConvertBookToJSON(book));
             }
+
+            return listOfBookJSON;
         }
 
-        public void EditBook()
+        public Book? ConvertJSONToBook(string bookJSON)
         {
-            
+            return JsonConvert.DeserializeObject<Book>(bookJSON);
         }
 
-        public void RemoveBook()
+        public string ConvertBookToJSON(Book book)
         {
-
+            return JsonConvert.SerializeObject(book);
         }
 
     }
 
-    public class FileDbConnection
-    {
-        List<Book> ReadDatabase()
-        {
-            var books = new List<Book>();
-            return books;
-        }
+    //public class DapperDbConnection : IBookRepository
+    //{
+    //    public static string connectionString = "Server=localhost;User ID=sa;Password=9n8kZ81J0iuB;Initial Catalog=SIMPLE_LIBRARY;Integrated Security=false;TrustServerCertificate=True";
 
-        void AddBook(Book book)
-        {
+    //    public List<Book> ReadDatabase(string filePath)
+    //    {
+    //        using (var connection = new SqlConnection(connectionString))
+    //        {
+    //            var sql = "SELECT * FROM dbo.simple_library";
 
-        }
+    //            var books = connection.Query<Book>(sql).ToList();
 
-        void EditBook()
-        {
+    //            // should be in interaction controller
+    //            foreach (Book book in books)
+    //            {
+    //                Console.WriteLine(book.ToString());
+    //            }
+    //        }
 
-        }
+    //        return new List<Book>();
+    //    }
 
-        void RemoveBook()
-        {
+    //    public Book? GetBookByTitle(string title)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
 
-        }
+    //    public (bool isSuccess, string? message) AddBook(string bookJSON)
+    //    {
+    //        using (var connection = new SqlConnection(connectionString))
+    //        {
+    //            // get value from user
 
-    }
+    //            var sql = "INSERT INTO dbo.simple_library";
+
+    //            var books = connection.Query<Book>(sql).ToList();
+
+    //            foreach (Book book in books)
+    //            {
+    //                Console.WriteLine(book.ToString());
+    //            }
+    //        }
+
+    //        return (true, null);
+    //    }
+
+    //    public (bool isSuccess, Book updatedBook) UpdateBook(string bookToUpdate, Book updatedBook)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+
+    //    public bool UpdateBookInRepo(string bookToUpdate, Book updatedBook)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+
+    //    public void RemoveBook(string titleOfBookToRemove)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+
+    //}
 }
