@@ -104,39 +104,5 @@ public class BookService(IBookRepository bookRepository) : IBookService
 
         return (true, null, updatedBook);
     }
-
-    // from BookHelper
-    static string ModifyBook(string book, int propertyIndex)
-    {
-        var updatedBook = ChangeSinglePropertyOfBook(book, propertyIndex);
-        //the below line should be in InteractionController
-        //_interactionController.PrintUpdatedBookProperties(updatedBook);
-        return updatedBook;
-    }
-
-    // from BookHelper
-    static string ChangeSinglePropertyOfBook(string book, int propertyIndex)
-    {
-        var properties = book.Split(',');
-        //the below line should be in InteractionController
-        Console.WriteLine("\nPlease enter what you would like to update to: ");
-        var newProperty = Console.ReadLine();
-        properties[propertyIndex] = newProperty;
-        var updatedBook = String.Join(",", properties);
-        return updatedBook;
-    }
-
-
-
-    // from BookHelper
-    public static List<String> ConvertBookListToJSON(List<Book> books)
-    {
-        List<String> output = new List<String>();
-        foreach (var book in books)
-        {
-            output.Add(JsonConvert.SerializeObject(book));
-        }
-        return output;
-    }
 }
 
