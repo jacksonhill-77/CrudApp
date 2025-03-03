@@ -161,6 +161,48 @@ public class BookRepositoryTests
         testHelper._booksPostUpdate.Should().BeEquivalentTo(updatedBookJSON);
     }
 
+    [Fact]
+    public void CanReadDatabase_WithSuccess()
+    {
+        // Setup
+        var testHelper = new TestHelper();
+        var fileService = new FileService();
+        var filePath = "mockpath";
+        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
+        var book1 = new Book()
+        {
+            Id = 1,
+            Title = "Book 1",
+            Author = "Author 1",
+            PublishYear = 1901,
+        };
+
+        var book2 = new Book()
+        {
+            Id = 2,
+            Title = "Book 2",
+            Author = "Author 2",
+            PublishYear = 1902,
+        };
+
+        var books = new List<Book>
+        {   book1,
+            book2
+        };
+
+        var databaseBooks = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
+
+        var sut = testHelper
+            .SetupReadDatabase(databaseBooks)
+            .CreateSut();
+
+        // Act
+        var databaseReadResult = sut.ReadDatabase();
+
+        // Assert
+        databaseReadResult.Should().BeEquivalentTo(books);
+    }
+
     class TestHelper
     {
         private readonly MockRepository _mockRepository = new MockRepository(MockBehavior.Strict);
@@ -169,6 +211,7 @@ public class BookRepositoryTests
         public string _bookPostAdding = "";
         public List<string> _booksPostRemoval = new List<string>();
         public List<string> _booksPostUpdate = new List<string>();
+        public List<string> _databaseBooks = new List<string>();
 
 
         public TestHelper()
@@ -215,7 +258,14 @@ public class BookRepositoryTests
             return this;
         }
 
+        public TestHelper SetupReadDatabase(List<string> databaseBooks)
+        {
+            _fileServiceMock
+                .Setup(x => x.ReadLinesFromFile(_filePath))
+                .Returns(databaseBooks);
 
+            return this;
+        }
 
         public FileDbConnection CreateSut()
         {
