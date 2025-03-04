@@ -8,21 +8,25 @@ namespace CrudApp.services
 {
     public interface IUserInputService
     {
-        (bool isSuccess, string? message, string? userInput) GetUserInput(string prompt);
+        (string? message, string? userInput) GetUserInput(string? prompt);
     }
     public class UserInputService : IUserInputService
     {
-        public (bool isSuccess, string? message, string? userInput) GetUserInput(string prompt)
+        public (string? message, string? userInput) GetUserInput(string? prompt)
         {
-            Console.WriteLine(prompt);
+            if (prompt != null)
+            {
+                Console.WriteLine(prompt);
+            }
+
             var userInput = Console.ReadLine();
 
             if (userInput == null)
             {
-                return (false, "Could not get user input", null);
+                return ("Could not get user input", null);
             }
 
-            return (true, null, userInput);
+            return (null, userInput);
         }
     }
 }

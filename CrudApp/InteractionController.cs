@@ -20,7 +20,8 @@ public class InteractionController(IBookService bookService, IUserInputService u
         _isRunning = true;
         do
         {
-            var userInput = Console.ReadLine();
+            PrintOptions();
+            var userInput = _userInputService.GetUserInput(null);
             switch (userInput)
             {
                 case "1":
@@ -43,31 +44,45 @@ public class InteractionController(IBookService bookService, IUserInputService u
                     break;
 
             }
-            PrintOptions();
         } while (_isRunning == true);
     }
 
     void DisplayBooks()
     {
-        //PrintBooks(_bookService.FetchBooks());
-        throw new NotImplementedException();
+        var fetchResult = _bookService.FetchBooks();
+
+        if (fetchResult.isSuccess == false)
+        {
+            Console.WriteLine(fetchResult.message);
+            return;
+        }
+
+        PrintBooks(fetchResult.books);
     }
 
     void AddBooks()
     {
-        throw new NotImplementedException();
+        // May need to change to give multiple book functionality
+        var book = GetUserInputAsBook();
+        _bookService.AddBook(book);
     }
 
     void RemoveBook()
     {
-        throw new NotImplementedException();
+        var getBookTitleResult = _userInputService.GetUserInput("Please enter the title of the book you wish to remove:");
+
+        if (getBookTitleResult.userInput == null)
+        {
+            Console.WriteLine(getBookTitleResult.message);
+            return;
+        }
+
+        _bookService.RemoveBook(getBookTitleResult.userInput);
     }
 
     void UpdateBook()
     {
-        var bookIndex = GetIndexOfBookToModify("update");
-        //_bookService.UpdateBook();
-        throw new NotImplementedException();
+        _bookService.UpdateBook();
     }
 
     void PrintOptions()
@@ -80,7 +95,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
         Console.WriteLine("5. Close application");
     }
     
-    void PrintBooks(List<Book> books)
+    void PrintBooks(List<Book?>? books)
     {
         Console.WriteLine("\n");
 
@@ -213,6 +228,8 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
         return book;
     }
+
+    
 }
 
 

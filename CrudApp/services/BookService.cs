@@ -9,7 +9,7 @@ public interface IBookService
     (bool isSuccess, string? message) AddBook(Book book);
     void AddBooks(List<Book> books);
     void RemoveBook(string titleOfBookToRemove);
-    (bool isSuccess, string? message, List<Book?>?) FetchBooks();
+    (bool isSuccess, string? message, List<Book?>? books) FetchBooks();
     (bool isSuccess, string? message, Book? updatedBook) UpdateBook(string titleOfBookToUpdate, Book updatedBook);
 }
 
@@ -81,13 +81,13 @@ public class BookService(IBookRepository bookRepository) : IBookService
         throw new NotImplementedException();
     }
 
-    public (bool isSuccess, string? message, List<Book?>?) FetchBooks()
+    public (bool isSuccess, string? message, List<Book?>? books) FetchBooks()
     {
         var booksToFetch = _bookRepository.ReadDatabase();
 
         if(booksToFetch == null)
         {
-            return (false, "Book doesn't exist in library", null);
+            return (false, "No books found in library", null);
         }
 
         return (true, null, booksToFetch);
