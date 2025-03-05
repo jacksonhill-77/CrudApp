@@ -28,7 +28,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
                     DisplayBooks();
                     break;
                 case "2":
-                    AddBooks();
+                    AddBook();
                     break;
                 case "3":
                     RemoveBook();
@@ -60,7 +60,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
         PrintBooks(fetchResult.books);
     }
 
-    void AddBooks()
+    void AddBook()
     {
         // May need to change to give multiple book functionality
         var book = GetUserInputAsBook();
@@ -82,7 +82,8 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
     void UpdateBook()
     {
-        _bookService.UpdateBook();
+        var titleOfBookToUpdate = _userInputService.GetUserInput("Please enter the title of the book you wish to update");
+        _bookService.UpdateBook(titleOfBookToUpdate, )
     }
 
     void PrintOptions()
@@ -211,14 +212,26 @@ public class InteractionController(IBookService bookService, IUserInputService u
         // dummy pid
         var pid = 0;
 
-        Console.WriteLine("\nPlease enter the book title: ");
-        var title = Console.ReadLine();
+        var isSuccessful = true;
 
-        Console.WriteLine("\nPlease enter the author name: ");
-        var author = Console.ReadLine();
+        while (isSuccessful)
+        {
 
-        Console.WriteLine("\nPlease enter the publish date: ");
-        var publishDate = int.Parse(Console.ReadLine());
+        }
+
+        var title = _userInputService
+            .GetUserInput("\nPlease enter the book title:")
+            .userInput;
+
+        if (title == null)
+
+        var author = _userInputService
+            .GetUserInput("\nPlease enter the author name: ")
+            .userInput;
+
+        var publishDate = _userInputService
+            .GetUserInput("\nPlease enter the publish date: ")
+            .userInput;
 
         var book = new Book();
         book.Id = pid;
