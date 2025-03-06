@@ -68,6 +68,7 @@ namespace CrudApp.services
 
         public (string? message, string? userInput) GetUserInput(string prompt)
         {
+            Console.WriteLine(prompt);
             var userInput = Console.ReadLine();
 
             if (userInput == null)

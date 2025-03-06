@@ -1,6 +1,8 @@
 ﻿using CrudApp.models;
 using CrudApp.services;
 using CrudApp.utils;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Diagnostics.Metrics;
 
 namespace CrudApp;
 
@@ -21,7 +23,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
         do
         {
             PrintOptions();
-            var userInput = _userInputService.GetUserInput("\nPlease enter a number from the options above:\n").userInput;
+            var userInput = _userInputService.GetUserInput("").userInput;
             switch (userInput)
             {
                 case "1":
@@ -57,6 +59,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
             return;
         }
 
+        Console.WriteLine("Books currently in library:\n");
         PrintBooks(fetchResult.books);
     }
 
@@ -90,6 +93,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
     void PrintOptions()
     {
+        Console.WriteLine("\nPlease enter a number from the options below:\n");
         Console.WriteLine("1. Display current books in the library");
         Console.WriteLine("2. Add a book");
         Console.WriteLine("3. Remove a book");
@@ -102,8 +106,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
         Console.WriteLine("\n");
 
         books
-            .GroupBy(x => x.Author, (s, enumerable) => new { Author = s, Books = enumerable.ToList() })
-            .Select(x => ConvertLineToReadableInfo(x.Author, x.Books))
+            .Select(x => ConvertLineToReadableInfo(x))
             .ToList()
             .ForEach(Console.WriteLine);
     }
@@ -167,9 +170,9 @@ public class InteractionController(IBookService bookService, IUserInputService u
         return $"Author: {author}\n" + string.Join("\n", books.Select(ConvertLineToReadableInfo));
     }
     
-    string ConvertLineToReadableInfo(Book book, int index)
+    string ConvertLineToReadableInfo(Book book)
     {
-        return $"{index + 1}. Title: {book.Title}. Author: {book.Author}. Year published: {book.PublishYear}";
+        return $"Title: {book.Title}. Author: {book.Author}. Year published: {book.PublishYear}";
     }
 
     // from BookHelper
@@ -180,7 +183,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
         do
         {
-            books.Add(GetUserInputAsBook());
+            books.Add(GetUserInputAsBook().book);
             Console.WriteLine("\nDo you wish to add another book? Y/N");
             var userResponse = Console.ReadLine();
             if (userResponse == "y")

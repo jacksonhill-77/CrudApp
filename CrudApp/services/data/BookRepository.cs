@@ -20,7 +20,7 @@ namespace CrudApp.services.data
         // the classes based on this interface only return from database, rather than return and print. so readdatabase shouldn't be void 
         // the interface class should deal with the printing 
         List<Book?> ReadDatabase();
-        Book? GetBookByTitle(string title);
+        (Book? book, string? message) GetBookByTitle(string titleOfBook);
         (bool isSuccess, string? message) AddBook(Book book);
         (bool isSuccess, string? message) UpdateBook(string titleOfBookToUpdate, Book updatedBook);
         (bool isSuccess, string? message) RemoveBook(string titleOfBookToRemove);
@@ -97,21 +97,22 @@ namespace CrudApp.services.data
             _fileService.WriteLinesToFile(writeableLines, _filePath);
         }
 
-        private (List<Book?> databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
+        public (List<Book?> databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
         {
             var databaseBooks = ReadDatabase();
-            var getBookResult = GetBookByTitle(databaseBooks, titleOfBook);
+            var getBookResult = GetBookByTitle(titleOfBook);
 
             if (getBookResult.book == null)
             {
                 return (null, getBookResult.message);
             }
-            databaseBooks.Remove(GetBookByTitle(databaseBooks, titleOfBook).book);
+            databaseBooks.Remove(GetBookByTitle(titleOfBook).book);
             return (databaseBooks, null);
         }
 
-        private (Book? book, string? message) GetBookByTitle(List<Book> databaseBooks, string titleOfBook)
+        public (Book? book, string? message) GetBookByTitle(string titleOfBook)
         {
+            var databaseBooks = ReadDatabase();
             var book = databaseBooks.FirstOrDefault(book => book.Title == titleOfBook);
 
             if (book == null)
@@ -120,11 +121,6 @@ namespace CrudApp.services.data
             }
 
             return (book, null);
-        }
-
-        public Book GetBookByTitle(string title)
-        {
-            throw new NotImplementedException();
         }
 
         private (bool isSuccess, string? message) RemoveBookFromList(List<Book> books, Book book)
