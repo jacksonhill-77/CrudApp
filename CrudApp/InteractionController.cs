@@ -21,7 +21,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
         do
         {
             PrintOptions();
-            var userInput = _userInputService.GetUserInput(null);
+            var userInput = _userInputService.GetUserInput("\nPlease enter a number from the options above:\n").userInput;
             switch (userInput)
             {
                 case "1":
@@ -63,7 +63,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
     void AddBook()
     {
         // May need to change to give multiple book functionality
-        var book = GetUserInputAsBook();
+        var book = GetUserInputAsBook().book;
         _bookService.AddBook(book);
     }
 
@@ -82,13 +82,14 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
     void UpdateBook()
     {
-        var titleOfBookToUpdate = _userInputService.GetUserInput("Please enter the title of the book you wish to update");
-        _bookService.UpdateBook(titleOfBookToUpdate, )
+        var titleOfBookToUpdate = _userInputService.GetUserInput("Please enter the title of the book you wish to update").userInput;
+        Console.WriteLine("... and press any key to start entering the new information that you would like the book to have");
+        var book = GetUserInputAsBook().book;
+        _bookService.UpdateBook(titleOfBookToUpdate, book);
     }
 
     void PrintOptions()
     {
-        Console.WriteLine("\nPlease enter a number from the options below:\n");
         Console.WriteLine("1. Display current books in the library");
         Console.WriteLine("2. Add a book");
         Console.WriteLine("3. Remove a book");
@@ -107,7 +108,6 @@ public class InteractionController(IBookService bookService, IUserInputService u
             .ForEach(Console.WriteLine);
     }
 
-    // from BookHelper
     void PrintUpdatedBookProperties(string updatedBook)
     {
         Console.WriteLine("\nUpdated. New properties are as follows: ");
@@ -129,20 +129,15 @@ public class InteractionController(IBookService bookService, IUserInputService u
         };
     }
 
-
-
-    // from BookHelper
     static int GetIndexOfBookToModify(string modificationType)
     {
         // TODO: Re-think
-        //the below line should be in InteractionController
         Console.WriteLine($"Please select the number of a book to {modificationType}:");
         //the below line should be in InteractionController
         //PrintLines(FileUtility.ReadLinesFromFile(filePath), filePath);
         return int.Parse(Console.ReadLine()) - 1;
     }
 
-    // from BookHelper
     static string ChangeBookProperties(string book)
     {
         //TODO: Re - think
@@ -206,40 +201,35 @@ public class InteractionController(IBookService bookService, IUserInputService u
         return books;
     }
 
-    // from BookHelper
-    public Book GetUserInputAsBook()
+    public (bool isSuccess, Book? book) GetUserInputAsBook()
     {
         // dummy pid
         var pid = 0;
 
-        var isSuccessful = true;
-
-        while (isSuccessful)
-        {
-
-        }
-
         var title = _userInputService
-            .GetUserInput("\nPlease enter the book title:")
+            .GetUserInputLoop("\nPlease enter the book title:")
             .userInput;
 
-        if (title == null)
-
         var author = _userInputService
-            .GetUserInput("\nPlease enter the author name: ")
+            .GetUserInputLoop("\nPlease enter the author name: ")
             .userInput;
 
         var publishDate = _userInputService
-            .GetUserInput("\nPlease enter the publish date: ")
+            .GetUserInputAsIntLoop("\nPlease enter the publish date: ")
             .userInput;
+
+        if (title == null || author == null || publishDate == null)
+        {
+            return (false, null);
+        }
 
         var book = new Book();
         book.Id = pid;
         book.Title = title;
         book.Author = author;
-        book.PublishYear = publishDate;
+        book.PublishYear = publishDate ?? -1;
 
-        return book;
+        return (true, book);
     }
 
     

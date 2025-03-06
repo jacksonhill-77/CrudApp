@@ -9,6 +9,9 @@ namespace CrudApp.services
     public interface IUserInputService
     {
         (string? message, string? userInput) GetUserInput(string? prompt);
+        public (string? message, int? userInput) GetUserInputAsIntLoop(string? prompt);
+        public (string? message, string? userInput) GetUserInputLoop(string? prompt);
+        public (string? message, int? userInput) GetUserInputAsInt(string? prompt);
     }
     public class UserInputService : IUserInputService
     {
@@ -63,14 +66,8 @@ namespace CrudApp.services
             return (null, value);
         }
 
-        public (string? message, string? userInput) GetUserInput(string? prompt)
+        public (string? message, string? userInput) GetUserInput(string prompt)
         {
-            if (prompt != null)
-            {
-                Console.WriteLine(prompt);
-                return ("No prompt was found for user", null);
-            }
-
             var userInput = Console.ReadLine();
 
             if (userInput == null)

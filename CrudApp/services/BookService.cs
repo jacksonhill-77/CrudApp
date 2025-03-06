@@ -93,7 +93,7 @@ public class BookService(IBookRepository bookRepository) : IBookService
         return (true, null, booksToFetch);
     }
 
-    public (bool isSuccess, string? message, Book? updatedBook) UpdateBook(string titleOfBookToUpdate, Book updatedBook)
+    public (bool isSuccess, string? message, Book? updatedBook) UpdateBook(string? titleOfBookToUpdate, Book? updatedBook)
     {
         var bookToUpdate = _bookRepository.UpdateBook(titleOfBookToUpdate, updatedBook);
 
