@@ -55,7 +55,7 @@ public class BookService(IBookRepository bookRepository) : IBookService
     {
         var existingBook = _bookRepository.GetBookByTitle(newBook.Title);
         
-        if(existingBook != null)
+        if(existingBook.book != null)
         {
             return (false, "Already exists");
         }
