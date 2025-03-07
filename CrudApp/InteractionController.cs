@@ -6,11 +6,21 @@ using System.Diagnostics.Metrics;
 
 namespace CrudApp;
 
+
+public interface IInteractionController
+{
+    void StartInteraction();
+    public (bool isSuccess, string? message) DisplayBooks();
+    public (bool isSuccess, string? message) AddBook();
+    public (bool isSuccess, string? message) RemoveBook();
+    public (bool isSuccess, string? message) UpdateBook();
+}
+
 /// <summary>
 /// The role of the InteractionController is to implement all console read and write operations
 /// </summary>
 /// <param name="bookService">Class that implements IBookService</param>
-public class InteractionController(IBookService bookService, IUserInputService userInputService)
+public class InteractionController(IBookService bookService, IUserInputService userInputService) : IInteractionController
 {
     private readonly IBookService _bookService = bookService;
     private readonly IUserInputService _userInputService = userInputService;
@@ -49,21 +59,23 @@ public class InteractionController(IBookService bookService, IUserInputService u
         } while (_isRunning == true);
     }
 
-    void DisplayBooks()
+    public (bool isSuccess, string? message) DisplayBooks()
     {
         var fetchResult = _bookService.FetchBooks();
 
         if (fetchResult.isSuccess == false)
         {
             Console.WriteLine(fetchResult.message);
-            return;
+            return (false, fetchResult.message);
         }
 
         Console.WriteLine("Books currently in library:\n");
         PrintBooks(fetchResult.books);
+
+        return (true, null);
     }
 
-    void AddBook()
+    public (bool isSuccess, string? message) AddBook()
     {
         // May need to change to give multiple book functionality
         var bookResult = GetUserInputAsBook();
@@ -71,32 +83,34 @@ public class InteractionController(IBookService bookService, IUserInputService u
         if (bookResult.book == null)
         {
             Console.WriteLine(bookResult.message);
-            return;
+            return (false, bookResult.message);
         }
 
         _bookService.AddBook(bookResult.book);
+        return (true, null);
     }
 
-    void RemoveBook()
+    public (bool isSuccess, string? message) RemoveBook()
     {
         var getBookTitleResult = _userInputService.GetUserInput("Please enter the title of the book you wish to remove:");
 
         if (getBookTitleResult.userInput == null)
         {
             Console.WriteLine(getBookTitleResult.message);
-            return;
+            return (false, getBookTitleResult.message);
         }
 
         _bookService.RemoveBook(getBookTitleResult.userInput);
+        return (true, null);
     }
 
-    void UpdateBook()
+    public (bool isSuccess, string? message) UpdateBook()
     {
         var (getTitleMessage, titleOfBookToUpdate) = _userInputService.GetUserInput("Please enter the title of the book you wish to update");
         if (titleOfBookToUpdate == null)
         {
             Console.WriteLine(getTitleMessage);
-            return;
+            return (false, getTitleMessage);
         }
 
         Console.WriteLine("... and press any key to start entering the new information that you would like the book to have");
@@ -105,10 +119,12 @@ public class InteractionController(IBookService bookService, IUserInputService u
         if (book == null)
         {
             Console.WriteLine(getBookMessage);
-            return;
+            return (false, getBookMessage);
         }
 
         _bookService.UpdateBook(titleOfBookToUpdate, book);
+
+        return (true, null);
     }
 
     void PrintOptions()
