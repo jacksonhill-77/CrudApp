@@ -19,7 +19,7 @@ namespace CrudApp.services.data
         // public unneccessary 
         // the classes based on this interface only return from database, rather than return and print. so readdatabase shouldn't be void 
         // the interface class should deal with the printing 
-        List<Book?> ReadDatabase();
+        List<Book> ReadDatabase();
         (Book? book, string? message) GetBookByTitle(string titleOfBook);
         (bool isSuccess, string? message) AddBook(Book book);
         (bool isSuccess, string? message) UpdateBook(string titleOfBookToUpdate, Book updatedBook);
@@ -48,9 +48,14 @@ namespace CrudApp.services.data
             _fileService = fileService;
             _filePath = filePath;
         }
-        public List<Book?> ReadDatabase()
+        public List<Book> ReadDatabase()
         {
-            var listOfBookJSON = _fileService.ReadLinesFromFile(_filePath);
+            var lines = _fileService.ReadLinesFromFile(_filePath);
+
+            var listOfBookJSON = lines
+                .Where(x => x != null)
+                .ToList();
+
             return ConvertListOfJSONToBooks(listOfBookJSON);
         }
 
@@ -86,18 +91,24 @@ namespace CrudApp.services.data
         public (bool isSuccess, string? message) RemoveBook(string titleOfBookToUpdate)
         {
             var returnDatabaseResult = ReturnDatabaseWithoutBook(titleOfBookToUpdate);
+
+            if (returnDatabaseResult.databaseBooks == null)
+            {
+                return (false, returnDatabaseResult.message);
+            }
+
             WriteBooksToDatabase(returnDatabaseResult.databaseBooks);
 
             return (true, "Book removed succesfully");
         }
 
-        private void WriteBooksToDatabase(List<Book?> databaseBooks)
+        private void WriteBooksToDatabase(List<Book> databaseBooks)
         {
             var writeableLines = ConvertListOfBooksToJSON(databaseBooks);
             _fileService.WriteLinesToFile(writeableLines, _filePath);
         }
 
-        public (List<Book?> databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
+        public (List<Book>? databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
         {
             var databaseBooks = ReadDatabase();
             var getBookResult = GetBookByTitle(titleOfBook);
@@ -106,7 +117,7 @@ namespace CrudApp.services.data
             {
                 return (null, getBookResult.message);
             }
-            databaseBooks.Remove(GetBookByTitle(titleOfBook).book);
+            databaseBooks.Remove(getBookResult.book);
             return (databaseBooks, null);
         }
 
@@ -128,12 +139,18 @@ namespace CrudApp.services.data
             throw new NotImplementedException();
         }
 
-        private List<Book?> ConvertListOfJSONToBooks(List<string> listOfBookJSON)
+        private List<Book> ConvertListOfJSONToBooks(List<string> listOfBookJSON)
         {
-            var listOfBooks = new List<Book?>();
+            var listOfBooks = new List<Book>();
 
-            listOfBookJSON.ForEach(
-                book => listOfBooks.Add(ConvertJSONToBook(book)));
+            listOfBookJSON.ForEach(book =>
+            {
+                var result = ConvertJSONToBook(book);
+                if (result.book != null)
+                {
+                    listOfBooks.Add(result.book);
+                }
+            });
 
             return listOfBooks;
         }
@@ -149,9 +166,15 @@ namespace CrudApp.services.data
             return listOfBookJSON;
         }
 
-        public Book? ConvertJSONToBook(string bookJSON)
+        public (string? message, Book? book) ConvertJSONToBook(string bookJSON)
         {
-            return JsonConvert.DeserializeObject<Book>(bookJSON);
+            var book = JsonConvert.DeserializeObject<Book>(bookJSON);
+            if (book == null)
+            {
+                return ("Converting book to JSON returned null", book);
+            }
+
+            return (null, book);
         }
 
         public string ConvertBookToJSON(Book book)

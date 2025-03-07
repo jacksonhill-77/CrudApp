@@ -42,6 +42,8 @@ public class FileService : IFileService
 
     public List<string> ReadLinesFromFile(string filePath)
     {
-        return File.ReadAllLines(filePath).ToList();
+        return File.ReadAllLines(filePath)
+            .Where(x => x != null)
+            .ToList();
     }
 }

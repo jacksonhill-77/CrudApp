@@ -66,8 +66,15 @@ public class InteractionController(IBookService bookService, IUserInputService u
     void AddBook()
     {
         // May need to change to give multiple book functionality
-        var book = GetUserInputAsBook().book;
-        _bookService.AddBook(book);
+        var bookResult = GetUserInputAsBook();
+
+        if (bookResult.book == null)
+        {
+            Console.WriteLine(bookResult.message);
+            return;
+        }
+
+        _bookService.AddBook(bookResult.book);
     }
 
     void RemoveBook()
@@ -85,9 +92,22 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
     void UpdateBook()
     {
-        var titleOfBookToUpdate = _userInputService.GetUserInput("Please enter the title of the book you wish to update").userInput;
+        var (getTitleMessage, titleOfBookToUpdate) = _userInputService.GetUserInput("Please enter the title of the book you wish to update");
+        if (titleOfBookToUpdate == null)
+        {
+            Console.WriteLine(getTitleMessage);
+            return;
+        }
+
         Console.WriteLine("... and press any key to start entering the new information that you would like the book to have");
-        var book = GetUserInputAsBook().book;
+        var (isSuccess, getBookMessage, book) = GetUserInputAsBook();
+
+        if (book == null)
+        {
+            Console.WriteLine(getBookMessage);
+            return;
+        }
+
         _bookService.UpdateBook(titleOfBookToUpdate, book);
     }
 
@@ -101,14 +121,21 @@ public class InteractionController(IBookService bookService, IUserInputService u
         Console.WriteLine("5. Close application");
     }
     
-    void PrintBooks(List<Book?>? books)
+    string? PrintBooks(List<Book>? books)
     {
         Console.WriteLine("\n");
+
+        if (books == null)
+        {
+            return "Could not find books to print";  
+        }
 
         books
             .Select(x => ConvertLineToReadableInfo(x))
             .ToList()
             .ForEach(Console.WriteLine);
+
+        return null;
     }
 
     void PrintUpdatedBookProperties(string updatedBook)
@@ -132,39 +159,6 @@ public class InteractionController(IBookService bookService, IUserInputService u
         };
     }
 
-    static int GetIndexOfBookToModify(string modificationType)
-    {
-        // TODO: Re-think
-        Console.WriteLine($"Please select the number of a book to {modificationType}:");
-        //the below line should be in InteractionController
-        //PrintLines(FileUtility.ReadLinesFromFile(filePath), filePath);
-        return int.Parse(Console.ReadLine()) - 1;
-    }
-
-    static string ChangeBookProperties(string book)
-    {
-        //TODO: Re - think
-        var isRunning = true;
-        while (isRunning)
-        {
-            Console.WriteLine("\nPlease select the part of the book you wish to update by selecting 1-3: ");
-            //Console.WriteLine(InteractionController.ConvertLineToPropertiesList(book));
-            var chosenProperty = int.Parse(Console.ReadLine()) - 1;
-            //book = _bookService.ModifyBook(book, chosenProperty);
-            Console.WriteLine("\nDo you wish to continue editing? y/ n");
-            var continueEditing = Console.ReadLine();
-            if (continueEditing == "y")
-            {
-                continue;
-            }
-            else if (continueEditing == "n")
-            {
-                break;
-            }
-        }
-
-        return book;
-    }
     string ConvertLineToReadableInfo(string? author, List<Book> books)
     {
         return $"Author: {author}\n" + string.Join("\n", books.Select(ConvertLineToReadableInfo));
@@ -183,8 +177,17 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
         do
         {
-            books.Add(GetUserInputAsBook().book);
+            var userInput = GetUserInputAsBook();
+
+            if (userInput.book == null)
+            {
+                Console.WriteLine("No user input could be found");
+                continue;
+            }
+            books.Add(userInput.book);
+
             Console.WriteLine("\nDo you wish to add another book? Y/N");
+
             var userResponse = Console.ReadLine();
             if (userResponse == "y")
             {
@@ -204,7 +207,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
         return books;
     }
 
-    public (bool isSuccess, Book? book) GetUserInputAsBook()
+    public (bool isSuccess, string? message, Book? book) GetUserInputAsBook()
     {
         // dummy pid
         var pid = 0;
@@ -223,7 +226,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
 
         if (title == null || author == null || publishDate == null)
         {
-            return (false, null);
+            return (false, "Could not enter information", null);
         }
 
         var book = new Book();
@@ -232,7 +235,7 @@ public class InteractionController(IBookService bookService, IUserInputService u
         book.Author = author;
         book.PublishYear = publishDate ?? -1;
 
-        return (true, book);
+        return (true, null, book);
     }
 
     

@@ -12,6 +12,7 @@ namespace CrudApp.services
         public (string? message, int? userInput) GetUserInputAsIntLoop(string? prompt);
         public (string? message, string? userInput) GetUserInputLoop(string? prompt);
         public (string? message, int? userInput) GetUserInputAsInt(string? prompt);
+        public bool? CheckIfUserContinues(string prompt);
     }
     public class UserInputService : IUserInputService
     {
@@ -51,14 +52,14 @@ namespace CrudApp.services
 
         public (string? message, int? userInput) GetUserInputAsInt(string? prompt)
         {
-            var result = GetUserInput(prompt);
+            var (message, userInput) = GetUserInput(prompt);
 
-            if (result.userInput == null)
+            if (userInput == null)
             {
-                return ("No input found from user", null);   
+                return (message, null);   
             }
 
-            if (!int.TryParse(result.userInput, out var value))
+            if (!int.TryParse(userInput, out var value))
             {
                 return ("User input was not a valid number", null);
             }
@@ -66,7 +67,7 @@ namespace CrudApp.services
             return (null, value);
         }
 
-        public (string? message, string? userInput) GetUserInput(string prompt)
+        public (string? message, string? userInput) GetUserInput(string? prompt)
         {
             Console.WriteLine(prompt);
             var userInput = Console.ReadLine();
@@ -77,6 +78,25 @@ namespace CrudApp.services
             }
 
             return (null, userInput);
+        }
+
+        public bool? CheckIfUserContinues(string prompt)
+        {
+            Console.WriteLine(prompt);
+            var userResponse = Console.ReadLine();
+            if (userResponse == "y")
+            {
+                return true;
+            }
+            else if (userResponse == "n")
+            {
+                return false;
+            }
+            else
+            {
+                Console.WriteLine("Invalid response, please try again.");
+                return null;
+            };
         }
     }
 }
