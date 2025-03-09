@@ -108,30 +108,41 @@ namespace CrudApp.services.data
             _fileService.WriteLinesToFile(writeableLines, _filePath);
         }
 
-        public (List<Book>? databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
+        private (List<Book>? databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
         {
-            var databaseBooks = ReadDatabase();
-            var getBookResult = GetBookByTitle(titleOfBook);
+            var (book, databaseBooks, message) = GetBookByTitle(titleOfBook);
 
-            if (getBookResult.book == null)
+            if (book == null)
             {
-                return (null, getBookResult.message);
+                return (null, message);
             }
-            databaseBooks.Remove(getBookResult.book);
+
+            if (databaseBooks == null)
+            {
+                return (null, message);
+            }
+            
+            databaseBooks.Remove(book);
+            
             return (databaseBooks, null);
         }
 
-        public (Book? book, string? message) GetBookByTitle(string titleOfBook)
+        private (Book? book, List<Book>? databaseBooks, string? message) GetBookByTitle(string titleOfBook)
         {
             var databaseBooks = ReadDatabase();
             var book = databaseBooks.FirstOrDefault(book => book.Title == titleOfBook);
 
-            if (book == null)
+            if (databaseBooks == null)
             {
-                return (null, "Could not find book title");
+                return (null, null, "Could not find books in database");
             }
 
-            return (book, null);
+            if (book == null)
+            {
+                return (null, null, "Could not find book title");
+            }
+
+            return (book, databaseBooks, null);
         }
 
         private (bool isSuccess, string? message) RemoveBookFromList(List<Book> books, Book book)
