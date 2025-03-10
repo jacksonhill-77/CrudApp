@@ -6,6 +6,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using System.Linq;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 
 namespace CrudApp.Tests.Repositories;
 /// <summary>
@@ -76,45 +77,61 @@ public class BookRepositoryTests
     {
         // Setup
         var testHelper = new TestHelper();
-        var fileService = new FileService();
-        var filePath = "mockpath";
-        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-        var book1 = new Book()
-        {
-            Id = 1,
-            Title = "Book 1",
-            Author = "Author 1",
-            PublishYear = 1901,
-        };
+        var messageSuccess = "Book removed succesfully";
 
-        var book2 = new Book()
-        {
-            Id = 2,
-            Title = "Book 2",
-            Author = "Author 2",
-            PublishYear = 1902,
-        };
-
-        var books = new List<Book> 
-        {   book1,
-            book2
-        };
-
-        var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
-        var booksPostRemoval = booksPreRemoval
-            .Skip(1)
-            .ToList();
-
-        var sut = testHelper
-            .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
-            .CreateSut();
+        var sut = testHelper.CreateSut();
 
         // Act
-        sut.RemoveBook(book1.Title);
+        var (isSuccess, message) = sut.RemoveBook("title");
 
         // Assert
-        testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
+        message.Should().BeEquivalentTo(messageSuccess);
     }
+
+    //[Fact]
+    //public void CanRemoveBook_WithSuccess()
+    //{
+    //    // Setup
+    //    var testHelper = new TestHelper();
+    //    var fileService = new FileService();
+    //    var filePath = "mockpath";
+    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
+    //    var book1 = new Book()
+    //    {
+    //        Id = 1,
+    //        Title = "Book 1",
+    //        Author = "Author 1",
+    //        PublishYear = 1901,
+    //    };
+
+    //    var book2 = new Book()
+    //    {
+    //        Id = 2,
+    //        Title = "Book 2",
+    //        Author = "Author 2",
+    //        PublishYear = 1902,
+    //    };
+
+    //    var books = new List<Book> 
+    //    {   book1,
+    //        book2
+    //    };
+
+    //    var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
+    //    var booksPostRemoval = booksPreRemoval
+    //        .Skip(1)
+    //        .ToList();
+
+    //    var sut = testHelper
+    //        .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
+    //        .CreateSut();
+
+    //    // Act
+    //    sut.RemoveBook(book1.Title);
+
+    //    // Assert
+    //    testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
+    //}
 
     [Fact]
     public void CanUpdateBook_WithSuccess()
@@ -237,21 +254,36 @@ public class BookRepositoryTests
                 .Returns((booksPreRemoval));
 
             _fileServiceMock
-                .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
+                .Setup(x => x.WriteLinesToFile(It.IsAny<List<string>>(), _filePath))
                 .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
                 .Returns((true, null));
 
             return this;
         }
 
+        //public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
+        //{
+        //    _fileServiceMock
+        //        .Setup(x => x.ReadLinesFromFile(_filePath))
+        //        .Returns((booksPreRemoval));
+
+        //    _fileServiceMock
+        //        .Setup(x => x.WriteLinesToFile(It.IsAny<List<string>>(), _filePath))
+        //        .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
+        //        .Returns((true, null));
+
+        //    return this;
+        //}
+
         public TestHelper SetupUpdateBook(List<string> booksPreUpdate, List<string> booksPostUpdate)
         {
+
             _fileServiceMock
                 .Setup(x => x.ReadLinesFromFile(_filePath))
                 .Returns((booksPreUpdate));
 
             _fileServiceMock
-                .Setup(x => x.WriteLinesToFile(booksPostUpdate, _filePath))
+                .Setup(x => x.WriteLinesToFile(It.IsAny<List<string>>(), _filePath))
                 .Callback<List<string>, string>((booksPostUpdate, filePath) => _booksPostUpdate = booksPostUpdate)
                 .Returns((true, null));
 

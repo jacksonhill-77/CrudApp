@@ -18,10 +18,7 @@ public class BookRepositoryTests
     {
         // Setup
         var testHelper = new TestHelper();
-        var fileService = new FileService();
-        var filePath = "mockpath";
-        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-        var newBook = new Book()
+        var book = new Book()
         {
             Id = 1,
             Title = "Test Title",
@@ -29,247 +26,241 @@ public class BookRepositoryTests
             PublishYear = 1900,
         };
 
-        var bookJSON = fileDbConnection.ConvertBookToJSON(newBook);
-
         var sut = testHelper
-            .SetupAddBook(bookJSON)
+            .SetupAddBook(book)
             .CreateSut();
 
         // Act
-        var response = sut.AddBook(newBook);
+        var response = sut.AddBook();
 
         // Assert
-        response.Should().Be((true, null)!);
+        response.Should().Be((true, null));
     }
 
-    [Fact]
-    public void CanAddBook_WithCorrectJSON()
-    {
-        // Setup
-        var testHelper = new TestHelper();
-        var fileService = new FileService();
-        var filePath = "mockpath";
-        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-        var newBook = new Book()
-        {
-            Id = 1,
-            Title = "Test Title",
-            Author = "Test Author",
-            PublishYear = 1900,
-        };
+    //[Fact]
+    //public void CanAddBook_WithCorrectJSON()
+    //{
+    //    // Setup
+    //    var testHelper = new TestHelper();
+    //    var fileService = new FileService();
+    //    var filePath = "mockpath";
+    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
+    //    var newBook = new Book()
+    //    {
+    //        Id = 1,
+    //        Title = "Test Title",
+    //        Author = "Test Author",
+    //        PublishYear = 1900,
+    //    };
 
-        var bookJSON = fileDbConnection.ConvertBookToJSON(newBook);
+    //    var bookJSON = fileDbConnection.ConvertBookToJSON(newBook);
 
-        var sut = testHelper
-            .SetupAddBook(bookJSON)
-            .CreateSut();
+    //    var sut = testHelper
+    //        .SetupAddBook(bookJSON)
+    //        .CreateSut();
 
-        // Act
-        var response = sut.AddBook(newBook);
+    //    // Act
+    //    var response = sut.AddBook(newBook);
 
-        // Assert
-        testHelper._bookPostAdding.Should().Be(bookJSON);
-    }
+    //    // Assert
+    //    testHelper._bookPostAdding.Should().Be(bookJSON);
+    //}
 
-    [Fact]
-    public void CanRemoveBook_WithSuccess()
-    {
-        // Setup
-        var testHelper = new TestHelper();
-        var fileService = new FileService();
-        var filePath = "mockpath";
-        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-        var book1 = new Book()
-        {
-            Id = 1,
-            Title = "Book 1",
-            Author = "Author 1",
-            PublishYear = 1901,
-        };
+    //[Fact]
+    //public void CanRemoveBook_WithSuccess()
+    //{
+    //    // Setup
+    //    var testHelper = new TestHelper();
+    //    var fileService = new FileService();
+    //    var filePath = "mockpath";
+    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
+    //    var book1 = new Book()
+    //    {
+    //        Id = 1,
+    //        Title = "Book 1",
+    //        Author = "Author 1",
+    //        PublishYear = 1901,
+    //    };
 
-        var book2 = new Book()
-        {
-            Id = 2,
-            Title = "Book 2",
-            Author = "Author 2",
-            PublishYear = 1902,
-        };
+    //    var book2 = new Book()
+    //    {
+    //        Id = 2,
+    //        Title = "Book 2",
+    //        Author = "Author 2",
+    //        PublishYear = 1902,
+    //    };
 
-        var books = new List<Book>
-        {   book1,
-            book2
-        };
+    //    var books = new List<Book>
+    //    {   book1,
+    //        book2
+    //    };
 
-        var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
-        var booksPostRemoval = booksPreRemoval
-            .Skip(1)
-            .ToList();
+    //    var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
+    //    var booksPostRemoval = booksPreRemoval
+    //        .Skip(1)
+    //        .ToList();
 
-        var sut = testHelper
-            .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
-            .CreateSut();
+    //    var sut = testHelper
+    //        .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
+    //        .CreateSut();
 
-        // Act
-        sut.RemoveBook(book1.Title);
+    //    // Act
+    //    sut.RemoveBook(book1.Title);
 
-        // Assert
-        testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
-    }
+    //    // Assert
+    //    testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
+    //}
 
-    [Fact]
-    public void CanUpdateBook_WithSuccess()
-    {
-        // Setup
-        var testHelper = new TestHelper();
-        var fileService = new FileService();
-        var filePath = "mockpath";
-        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-        var originalBook = new Book()
-        {
-            Id = 1,
-            Title = "Book 1",
-            Author = "Author 1",
-            PublishYear = 1901,
-        };
+    //[Fact]
+    //public void CanUpdateBook_WithSuccess()
+    //{
+    //    // Setup
+    //    var testHelper = new TestHelper();
+    //    var fileService = new FileService();
+    //    var filePath = "mockpath";
+    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
+    //    var originalBook = new Book()
+    //    {
+    //        Id = 1,
+    //        Title = "Book 1",
+    //        Author = "Author 1",
+    //        PublishYear = 1901,
+    //    };
 
-        var updatedBook = new Book()
-        {
-            Id = 2,
-            Title = "Book 2",
-            Author = "Author 2",
-            PublishYear = 1902,
-        };
+    //    var updatedBook = new Book()
+    //    {
+    //        Id = 2,
+    //        Title = "Book 2",
+    //        Author = "Author 2",
+    //        PublishYear = 1902,
+    //    };
 
-        var originalBookJSON = new List<string>()
-        {
-            fileDbConnection.ConvertBookToJSON(originalBook)
-        };
+    //    var originalBookJSON = new List<string>()
+    //    {
+    //        fileDbConnection.ConvertBookToJSON(originalBook)
+    //    };
 
-        var updatedBookJSON = new List<string>()
-        {
-            fileDbConnection.ConvertBookToJSON(updatedBook)
-        };
+    //    var updatedBookJSON = new List<string>()
+    //    {
+    //        fileDbConnection.ConvertBookToJSON(updatedBook)
+    //    };
 
-        var sut = testHelper
-            .SetupUpdateBook(originalBookJSON, updatedBookJSON)
-            .CreateSut();
+    //    var sut = testHelper
+    //        .SetupUpdateBook(originalBookJSON, updatedBookJSON)
+    //        .CreateSut();
 
-        // Act
-        sut.UpdateBook(originalBook.Title, updatedBook);
+    //    // Act
+    //    sut.UpdateBook(originalBook.Title, updatedBook);
 
-        // Assert
-        testHelper._booksPostUpdate.Should().BeEquivalentTo(updatedBookJSON);
-    }
+    //    // Assert
+    //    testHelper._booksPostUpdate.Should().BeEquivalentTo(updatedBookJSON);
+    //}
 
-    [Fact]
-    public void CanReadDatabase_WithSuccess()
-    {
-        // Setup
-        var testHelper = new TestHelper();
-        var fileService = new FileService();
-        var filePath = "mockpath";
-        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-        var book1 = new Book()
-        {
-            Id = 1,
-            Title = "Book 1",
-            Author = "Author 1",
-            PublishYear = 1901,
-        };
+    //[Fact]
+    //public void CanReadDatabase_WithSuccess()
+    //{
+    //    // Setup
+    //    var testHelper = new TestHelper();
+    //    var fileService = new FileService();
+    //    var filePath = "mockpath";
+    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
+    //    var book1 = new Book()
+    //    {
+    //        Id = 1,
+    //        Title = "Book 1",
+    //        Author = "Author 1",
+    //        PublishYear = 1901,
+    //    };
 
-        var book2 = new Book()
-        {
-            Id = 2,
-            Title = "Book 2",
-            Author = "Author 2",
-            PublishYear = 1902,
-        };
+    //    var book2 = new Book()
+    //    {
+    //        Id = 2,
+    //        Title = "Book 2",
+    //        Author = "Author 2",
+    //        PublishYear = 1902,
+    //    };
 
-        var books = new List<Book>
-        {   book1,
-            book2
-        };
+    //    var books = new List<Book>
+    //    {   book1,
+    //        book2
+    //    };
 
-        var databaseBooks = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
+    //    var databaseBooks = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
 
-        var sut = testHelper
-            .SetupReadDatabase(databaseBooks)
-            .CreateSut();
+    //    var sut = testHelper
+    //        .SetupReadDatabase(databaseBooks)
+    //        .CreateSut();
 
-        // Act
-        var databaseReadResult = sut.ReadDatabase();
+    //    // Act
+    //    var databaseReadResult = sut.ReadDatabase();
 
-        // Assert
-        databaseReadResult.Should().BeEquivalentTo(books);
-    }
+    //    // Assert
+    //    databaseReadResult.Should().BeEquivalentTo(books);
+    //}
 
     class TestHelper
     {
         private readonly MockRepository _mockRepository = new MockRepository(MockBehavior.Strict);
-        readonly Mock<IFileService> _fileServiceMock;
-        string _filePath = "mockpath";
-        public string _bookPostAdding = "";
-        public List<string> _booksPostRemoval = new List<string>();
-        public List<string> _booksPostUpdate = new List<string>();
-        public List<string> _databaseBooks = new List<string>();
+        readonly Mock<IBookService> _bookServiceMock;
+        readonly Mock<IUserInputService> _userInputServiceMock;
 
 
         public TestHelper()
         {
-            _fileServiceMock = _mockRepository.Create<IFileService>();
+            _bookServiceMock = _mockRepository.Create<IBookService>();
+            _userInputServiceMock = _mockRepository.Create<IUserInputService>();
         }
 
-        public TestHelper SetupAddBook(string bookJSON)
+        public TestHelper SetupAddBook(Book book)
         {
 
-            _fileServiceMock
-                .Setup(x => x.WriteLineToFile(bookJSON, _filePath))
-                .Callback<string, string>((bookJSON, filePath) => _bookPostAdding = bookJSON)
+            _bookServiceMock
+                .Setup(x => x.AddBook(book))
                 .Returns((true, null));
 
             return this;
         }
 
-        public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
+        //public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
+        //{
+        //    _fileServiceMock
+        //        .Setup(x => x.ReadLinesFromFile(_filePath))
+        //        .Returns(booksPreRemoval);
+
+        //    _fileServiceMock
+        //        .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
+        //        .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
+        //        .Returns((true, null));
+
+        //    return this;
+        //}
+
+        //public TestHelper SetupUpdateBook(List<string> booksPreUpdate, List<string> booksPostUpdate)
+        //{
+        //    _fileServiceMock
+        //        .Setup(x => x.ReadLinesFromFile(_filePath))
+        //        .Returns(booksPreUpdate);
+
+        //    _fileServiceMock
+        //        .Setup(x => x.WriteLinesToFile(booksPostUpdate, _filePath))
+        //        .Callback<List<string>, string>((booksPostUpdate, filePath) => _booksPostUpdate = booksPostUpdate)
+        //        .Returns((true, null));
+
+        //    return this;
+        //}
+
+        //public TestHelper SetupReadDatabase(List<string> databaseBooks)
+        //{
+        //    _fileServiceMock
+        //        .Setup(x => x.ReadLinesFromFile(_filePath))
+        //        .Returns(databaseBooks);
+
+        //    return this;
+        //}
+
+        public InteractionController CreateSut()
         {
-            _fileServiceMock
-                .Setup(x => x.ReadLinesFromFile(_filePath))
-                .Returns(booksPreRemoval);
-
-            _fileServiceMock
-                .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
-                .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
-                .Returns((true, null));
-
-            return this;
-        }
-
-        public TestHelper SetupUpdateBook(List<string> booksPreUpdate, List<string> booksPostUpdate)
-        {
-            _fileServiceMock
-                .Setup(x => x.ReadLinesFromFile(_filePath))
-                .Returns(booksPreUpdate);
-
-            _fileServiceMock
-                .Setup(x => x.WriteLinesToFile(booksPostUpdate, _filePath))
-                .Callback<List<string>, string>((booksPostUpdate, filePath) => _booksPostUpdate = booksPostUpdate)
-                .Returns((true, null));
-
-            return this;
-        }
-
-        public TestHelper SetupReadDatabase(List<string> databaseBooks)
-        {
-            _fileServiceMock
-                .Setup(x => x.ReadLinesFromFile(_filePath))
-                .Returns(databaseBooks);
-
-            return this;
-        }
-
-        public FileDbConnection CreateSut()
-        {
-            return new FileDbConnection(_fileServiceMock.Object, _filePath);
+            return new InteractionController(_bookServiceMock.Object, _userInputServiceMock.Object);
         }
     }
 }

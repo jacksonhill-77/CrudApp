@@ -20,7 +20,7 @@ namespace CrudApp.services.data
         // the classes based on this interface only return from database, rather than return and print. so readdatabase shouldn't be void 
         // the interface class should deal with the printing 
         List<Book> ReadDatabase();
-        (Book? book, string? message) GetBookByTitle(string titleOfBook);
+        (Book? book, List<Book>? databaseBooks, string? message) GetBookByTitle(string titleOfBook);
         (bool isSuccess, string? message) AddBook(Book book);
         (bool isSuccess, string? message) UpdateBook(string titleOfBookToUpdate, Book updatedBook);
         (bool isSuccess, string? message) RemoveBook(string titleOfBookToRemove);
@@ -102,13 +102,13 @@ namespace CrudApp.services.data
             return (true, "Book removed succesfully");
         }
 
-        private void WriteBooksToDatabase(List<Book> databaseBooks)
+        public void WriteBooksToDatabase(List<Book> databaseBooks)
         {
             var writeableLines = ConvertListOfBooksToJSON(databaseBooks);
             _fileService.WriteLinesToFile(writeableLines, _filePath);
         }
 
-        private (List<Book>? databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
+        public (List<Book>? databaseBooks, string? message) ReturnDatabaseWithoutBook(string titleOfBook)
         {
             var (book, databaseBooks, message) = GetBookByTitle(titleOfBook);
 
@@ -127,15 +127,16 @@ namespace CrudApp.services.data
             return (databaseBooks, null);
         }
 
-        private (Book? book, List<Book>? databaseBooks, string? message) GetBookByTitle(string titleOfBook)
+        public (Book? book, List<Book>? databaseBooks, string? message) GetBookByTitle(string titleOfBook)
         {
             var databaseBooks = ReadDatabase();
-            var book = databaseBooks.FirstOrDefault(book => book.Title == titleOfBook);
 
             if (databaseBooks == null)
             {
                 return (null, null, "Could not find books in database");
             }
+
+            var book = databaseBooks.FirstOrDefault(book => book.Title == titleOfBook);
 
             if (book == null)
             {
@@ -143,11 +144,6 @@ namespace CrudApp.services.data
             }
 
             return (book, databaseBooks, null);
-        }
-
-        private (bool isSuccess, string? message) RemoveBookFromList(List<Book> books, Book book)
-        {
-            throw new NotImplementedException();
         }
 
         private List<Book> ConvertListOfJSONToBooks(List<string> listOfBookJSON)

@@ -136,11 +136,11 @@ public class BookServiceTests
             _bookRepositoryMock
                 .Setup(x => x.GetBookByTitle(expectedTitle))
                 .Returns(doesExist
-                    ? new Book()
+                    ? (new Book()
                     {
                         Title = expectedTitle, 
-                    }
-                    : null);
+                    }, null, null )
+                    : (null, null, "Could not find book title"));
             return this;
         }
 
