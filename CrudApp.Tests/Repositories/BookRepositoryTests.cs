@@ -7,6 +7,7 @@ using Moq;
 using Xunit;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using Newtonsoft.Json;
 
 namespace CrudApp.Tests.Repositories;
 /// <summary>
@@ -77,61 +78,42 @@ public class BookRepositoryTests
     {
         // Setup
         var testHelper = new TestHelper();
-        var messageSuccess = "Book removed succesfully";
+        var book1 = new Book()
+        {
+            Id = 1,
+            Title = "Book 1",
+            Author = "Author 1",
+            PublishYear = 1901,
+        };
 
-        var sut = testHelper.CreateSut();
+        var book2 = new Book()
+        {
+            Id = 2,
+            Title = "Book 2",
+            Author = "Author 2",
+            PublishYear = 1902,
+        };
+
+        var books = new List<Book>
+        {   book1,
+            book2
+        };
+
+        var booksPreRemoval = books.ConvertAll(book => JsonConvert.SerializeObject(book));
+        var booksPostRemoval = booksPreRemoval
+            .Skip(1)
+            .ToList();
+
+        var sut = testHelper
+            .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
+            .CreateSut();
 
         // Act
-        var (isSuccess, message) = sut.RemoveBook("title");
+        sut.RemoveBook(book1.Title);
 
         // Assert
-        message.Should().BeEquivalentTo(messageSuccess);
+        testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
     }
-
-    //[Fact]
-    //public void CanRemoveBook_WithSuccess()
-    //{
-    //    // Setup
-    //    var testHelper = new TestHelper();
-    //    var fileService = new FileService();
-    //    var filePath = "mockpath";
-    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-    //    var book1 = new Book()
-    //    {
-    //        Id = 1,
-    //        Title = "Book 1",
-    //        Author = "Author 1",
-    //        PublishYear = 1901,
-    //    };
-
-    //    var book2 = new Book()
-    //    {
-    //        Id = 2,
-    //        Title = "Book 2",
-    //        Author = "Author 2",
-    //        PublishYear = 1902,
-    //    };
-
-    //    var books = new List<Book> 
-    //    {   book1,
-    //        book2
-    //    };
-
-    //    var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
-    //    var booksPostRemoval = booksPreRemoval
-    //        .Skip(1)
-    //        .ToList();
-
-    //    var sut = testHelper
-    //        .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
-    //        .CreateSut();
-
-    //    // Act
-    //    sut.RemoveBook(book1.Title);
-
-    //    // Assert
-    //    testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
-    //}
 
     [Fact]
     public void CanUpdateBook_WithSuccess()
@@ -222,8 +204,8 @@ public class BookRepositoryTests
 
     class TestHelper
     {
-        private readonly MockRepository _mockRepository = new MockRepository(MockBehavior.Strict);
-        readonly Mock<IFileService> _fileServiceMock;
+        public readonly MockRepository _mockRepository = new MockRepository(MockBehavior.Strict);
+        private readonly Mock<IFileService> _fileServiceMock;
         string _filePath = "mockpath";
         public string _bookPostAdding = "";
         public List<string> _booksPostRemoval = new List<string>();
