@@ -11,7 +11,7 @@ namespace CrudApp.Tests;
 /// <summary>
 /// SUT = Subject Under Test
 /// </summary>
-public class BookRepositoryTests
+public class InteractionControllerTests
 {
     [Fact]
     public void CanAddBook_WithSuccess()
@@ -27,7 +27,7 @@ public class BookRepositoryTests
         };
 
         var sut = testHelper
-            .SetupAddBook(book)
+            .SetupAddBook(book, "Book added successfully", book.Title, book.Author, book.PublishYear)
             .CreateSut();
 
         // Act
@@ -37,79 +37,50 @@ public class BookRepositoryTests
         response.Should().Be((true, null));
     }
 
-    //[Fact]
-    //public void CanAddBook_WithCorrectJSON()
-    //{
-    //    // Setup
-    //    var testHelper = new TestHelper();
-    //    var fileService = new FileService();
-    //    var filePath = "mockpath";
-    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-    //    var newBook = new Book()
-    //    {
-    //        Id = 1,
-    //        Title = "Test Title",
-    //        Author = "Test Author",
-    //        PublishYear = 1900,
-    //    };
+    [Fact]
+    public void CanRemoveBook_WithSuccess()
+    {
+        // Setup
+        var testHelper = new TestHelper();
+        var fileService = new FileService();
+        var filePath = "mockpath";
+        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
+        var book1 = new Book()
+        {
+            Id = 1,
+            Title = "Book 1",
+            Author = "Author 1",
+            PublishYear = 1901,
+        };
 
-    //    var bookJSON = fileDbConnection.ConvertBookToJSON(newBook);
+        var book2 = new Book()
+        {
+            Id = 2,
+            Title = "Book 2",
+            Author = "Author 2",
+            PublishYear = 1902,
+        };
 
-    //    var sut = testHelper
-    //        .SetupAddBook(bookJSON)
-    //        .CreateSut();
+        var books = new List<Book>
+        {   book1,
+            book2
+        };
 
-    //    // Act
-    //    var response = sut.AddBook(newBook);
+        var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
+        var booksPostRemoval = booksPreRemoval
+            .Skip(1)
+            .ToList();
 
-    //    // Assert
-    //    testHelper._bookPostAdding.Should().Be(bookJSON);
-    //}
+        var sut = testHelper
+            .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
+            .CreateSut();
 
-    //[Fact]
-    //public void CanRemoveBook_WithSuccess()
-    //{
-    //    // Setup
-    //    var testHelper = new TestHelper();
-    //    var fileService = new FileService();
-    //    var filePath = "mockpath";
-    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-    //    var book1 = new Book()
-    //    {
-    //        Id = 1,
-    //        Title = "Book 1",
-    //        Author = "Author 1",
-    //        PublishYear = 1901,
-    //    };
+        // Act
+        sut.RemoveBook(book1.Title);
 
-    //    var book2 = new Book()
-    //    {
-    //        Id = 2,
-    //        Title = "Book 2",
-    //        Author = "Author 2",
-    //        PublishYear = 1902,
-    //    };
-
-    //    var books = new List<Book>
-    //    {   book1,
-    //        book2
-    //    };
-
-    //    var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
-    //    var booksPostRemoval = booksPreRemoval
-    //        .Skip(1)
-    //        .ToList();
-
-    //    var sut = testHelper
-    //        .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
-    //        .CreateSut();
-
-    //    // Act
-    //    sut.RemoveBook(book1.Title);
-
-    //    // Assert
-    //    testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
-    //}
+        // Assert
+        testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
+    }
 
     //[Fact]
     //public void CanUpdateBook_WithSuccess()
@@ -211,29 +182,42 @@ public class BookRepositoryTests
             _userInputServiceMock = _mockRepository.Create<IUserInputService>();
         }
 
-        public TestHelper SetupAddBook(Book book)
+        public TestHelper SetupAddBook(Book book, string message, string title, string author, int publishYear)
         {
 
             _bookServiceMock
-                .Setup(x => x.AddBook(book))
+                .Setup(x => x.AddBook(It.Is<Book>(b =>
+                    b.Title == book.Title &&
+                    b.Author == book.Author &&
+                    b.PublishYear == book.PublishYear
+                    )))
                 .Returns((true, null));
+
+            _userInputServiceMock
+                .SetupSequence(x => x.GetUserInputLoop(It.IsAny<string>()))
+                .Returns((null, title))
+                .Returns((null, author));
+
+            _userInputServiceMock
+                .Setup(x => x.GetUserInputAsIntLoop(It.IsAny<string>()))
+                .Returns((null, publishYear));
 
             return this;
         }
 
-        //public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
-        //{
-        //    _fileServiceMock
-        //        .Setup(x => x.ReadLinesFromFile(_filePath))
-        //        .Returns(booksPreRemoval);
+        public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
+        {
+            _fileServiceMock
+                .Setup(x => x.ReadLinesFromFile(_filePath))
+                .Returns(booksPreRemoval);
 
-        //    _fileServiceMock
-        //        .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
-        //        .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
-        //        .Returns((true, null));
+            _fileServiceMock
+                .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
+                .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
+                .Returns((true, null));
 
-        //    return this;
-        //}
+            return this;
+        }
 
         //public TestHelper SetupUpdateBook(List<string> booksPreUpdate, List<string> booksPostUpdate)
         //{

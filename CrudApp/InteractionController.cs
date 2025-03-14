@@ -228,33 +228,45 @@ public class InteractionController(IBookService bookService, IUserInputService u
         // dummy pid
         var pid = 0;
 
-        var title = _userInputService
-            .GetUserInputLoop("\nPlease enter the book title:")
-            .userInput;
+        var (result, message, title, author, publishDate) = GetTitleAuthorPublishDate();
 
-        var author = _userInputService
-            .GetUserInputLoop("\nPlease enter the author name: ")
-            .userInput;
-
-        var publishDate = _userInputService
-            .GetUserInputAsIntLoop("\nPlease enter the publish date: ")
-            .userInput;
-
-        if (title == null || author == null || publishDate == null)
+        if (result == false)
         {
-            return (false, "Could not enter information", null);
+            return (false, message, null);
         }
 
         var book = new Book();
         book.Id = pid;
-        book.Title = title;
+        // is this the correct use of "!"? I am testing in the previous method that the result isn't null
+        book.Title = title!;
         book.Author = author;
         book.PublishYear = publishDate ?? -1;
 
         return (true, null, book);
     }
 
-    
+    private (bool isSuccess, string? message, string? title, string? author, int? publishDate) GetTitleAuthorPublishDate()
+    {
+        var title = _userInputService
+            .GetUserInputLoop("\nPlease enter the book title:")
+            .userInput;
+        var author = _userInputService
+            .GetUserInputLoop("\nPlease enter the author name: ")
+            .userInput;
+        var publishDate = _userInputService
+            .GetUserInputAsIntLoop("\nPlease enter the publish date: ")
+            .userInput;
+
+        if (title == null || author == null || publishDate == null)
+        {
+            return (false, "Could not enter information", null, null, null);
+        }
+
+        return (true, "Retrieved book information successfully", title, author, publishDate);
+    }
+
+
+
 }
 
 
