@@ -118,6 +118,30 @@ public class BookServiceTests
         response.Should().Be((true, null, updatedBook));
     }
 
+    [Fact]
+
+    public void CanRemoveBook_WithSuccess()
+    {
+        // Setup
+        var testHelper = new TestHelper();
+        var book = new Book()
+        {
+            Title = "Existing title",
+            Author = "Existing author",
+            PublishYear = 1901,
+        };
+
+        var sut = testHelper
+            .SetupRemoveBook(book.Title)
+            .CreateSut();
+
+        // Act
+        var response = sut.RemoveBook(book.Title);
+
+        // Assert 
+        response.Should().Be((true, null, updatedBook));
+    }
+
 
 
 
@@ -166,6 +190,15 @@ public class BookServiceTests
         {
             _bookRepositoryMock
                 .Setup(x => x.UpdateBook(titleOfBookToUpdate, updatedBook))
+                .Returns((true, "Book added successfully"));
+
+            return this;
+        }
+
+        public TestHelper SetupRemoveBook(string titleOfBookToRemove)
+        {
+            _bookRepositoryMock
+                .Setup(x => x.RemoveBook(titleOfBookToRemove))
                 .Returns((true, "Book added successfully"));
 
             return this;
