@@ -85,24 +85,32 @@ public class InteractionControllerTests
         response.Should().Be((true, message));
     }
 
-    //[Fact]
-    //public void CanDisplayBooks_WithSuccess()
-    //{
-    //    // Setup
-    //    var testHelper = new TestHelper();
-    //    var title = "New Title";
-    //    var message = "Book removed successfully";
+    [Fact]
+    public void CanDisplayBooks_WithSuccess()
+    {
+        // Setup
+        var testHelper = new TestHelper();
+        var booksToDisplay = new List<Book>()
+        {
+            new Book()
+            {
+                Id = 0,
+                Title = "Updated Title",
+                Author = "Updated Author",
+                PublishYear = 1900,
+            }
+        };
 
-    //    var sut = testHelper
-    //        .SetupRemoveBook(title, message)
-    //        .CreateSut();
+        var sut = testHelper
+            .SetupDisplayBooks(booksToDisplay)
+            .CreateSut();
 
-    //    // Act
-    //    var response = sut.RemoveBook();
+        // Act
+        var response = sut.DisplayBooks();
 
-    //    // Assert
-    //    response.Should().Be((true, message));
-    //}
+        // Assert
+        response.Should().Be((true, null));
+    }
 
     class TestHelper
     {
@@ -182,14 +190,15 @@ public class InteractionControllerTests
             return this;
         }
 
-        //public TestHelper SetupReadDatabase(List<string> databaseBooks)
-        //{
-        //    _fileServiceMock
-        //        .Setup(x => x.ReadLinesFromFile(_filePath))
-        //        .Returns(databaseBooks);
+        public TestHelper SetupDisplayBooks(List<Book> listOfBooksToDisplay)
+        {
 
-        //    return this;
-        //}
+            _bookServiceMock
+                .Setup(x => x.FetchBooks())
+                .Returns((true, It.IsAny<string>(), listOfBooksToDisplay));
+
+            return this;
+        }
 
         public InteractionController CreateSut()
         {
