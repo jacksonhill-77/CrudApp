@@ -1,27 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.11.35312.102
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudApp", "CrudApp.csproj", "{06052210-CDA3-4992-8F75-6C3047DA4B35}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudApp.Tests", "CrudApp.Tests\CrudApp.Tests.csproj", "{324342E7-3D49-4079-A6E3-2F05E7621B33}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BB30E4B8-B3E8-4A20-A3C6-C8CFD31DCF5C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudApp", "CrudApp\CrudApp.csproj", "{295DEED9-4DC7-42AF-8691-71C49677450D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{06052210-CDA3-4992-8F75-6C3047DA4B35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{06052210-CDA3-4992-8F75-6C3047DA4B35}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{06052210-CDA3-4992-8F75-6C3047DA4B35}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{06052210-CDA3-4992-8F75-6C3047DA4B35}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {29FC2B6E-CEA1-4036-9D16-AA35C876B039}
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{324342E7-3D49-4079-A6E3-2F05E7621B33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{324342E7-3D49-4079-A6E3-2F05E7621B33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{324342E7-3D49-4079-A6E3-2F05E7621B33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{324342E7-3D49-4079-A6E3-2F05E7621B33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{295DEED9-4DC7-42AF-8691-71C49677450D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{295DEED9-4DC7-42AF-8691-71C49677450D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{295DEED9-4DC7-42AF-8691-71C49677450D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{295DEED9-4DC7-42AF-8691-71C49677450D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

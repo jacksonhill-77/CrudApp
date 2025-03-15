@@ -6,3 +6,4 @@ bin/
 obj/
 *.AssemblyInfo.cs
 *.AssemblyInfoInputs.cache
+.idea/
