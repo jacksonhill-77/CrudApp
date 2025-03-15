@@ -6,7 +6,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace DefaultNamespace;
+namespace CrudApp.Tests.Services;
 /// <summary>
 /// SUT = Subject Under Test
 /// </summary>
@@ -131,19 +131,23 @@ public class BookServiceTests
             PublishYear = 1901,
         };
 
+        var bookList = new List<Book>()
+        {
+            book,
+        };
+
+        var message = "Book removed successfully";
+
         var sut = testHelper
-            .SetupRemoveBook(book.Title)
+            .SetupRemoveBook(book.Title, message, bookList)
             .CreateSut();
 
         // Act
         var response = sut.RemoveBook(book.Title);
 
         // Assert 
-        response.Should().Be((true, null, updatedBook));
+        response.Should().Be((true, message));
     }
-
-
-
 
     class TestHelper
     {
@@ -195,11 +199,15 @@ public class BookServiceTests
             return this;
         }
 
-        public TestHelper SetupRemoveBook(string titleOfBookToRemove)
+        public TestHelper SetupRemoveBook(string titleOfBookToRemove, string message, List<Book> bookList)
         {
             _bookRepositoryMock
                 .Setup(x => x.RemoveBook(titleOfBookToRemove))
-                .Returns((true, "Book added successfully"));
+                .Returns((true, message));
+
+            _bookRepositoryMock
+                .Setup(x => x.ReadDatabase())
+                .Returns(bookList);
 
             return this;
         }

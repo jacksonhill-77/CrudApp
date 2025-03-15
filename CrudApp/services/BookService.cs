@@ -8,7 +8,7 @@ public interface IBookService
 {
     (bool isSuccess, string? message) AddBook(Book book);
     void AddBooks(List<Book> books);
-    void RemoveBook(string titleOfBookToRemove);
+    (bool isSuccess, string? message) RemoveBook(string titleOfBookToRemove);
     (bool isSuccess, string? message, List<Book>? books) FetchBooks();
     (bool isSuccess, string? message, Book? updatedBook) UpdateBook(string titleOfBookToUpdate, Book updatedBook);
 }
@@ -16,40 +16,6 @@ public interface IBookService
 public class BookService(IBookRepository bookRepository) : IBookService
 {
     private readonly IBookRepository _bookRepository = bookRepository;
-
-    public void RemoveBook(Book book)
-    {
-        // TODO: Move to void RemoveBook(Book book)
-        // var chosenBook = GetIndexOfBookToModify("remove");
-        // var lines = _fileService.ReadLinesFromFile(filePath).ToList();
-        // lines.RemoveAt(chosenBook);
-        // _fileService.WriteLinesToFile(lines, filePath);
-        // // the below line should be in InteractionController
-        // Console.WriteLine("Book removed.");
-        // DisplayBooks();
-        throw new NotImplementedException();
-    }
-
-    //public (bool isSuccess, string? message) UpdateBook(string titleOfBookToUpdate, Book updatedBookProperties)
-    //{
-    //    var existingBook = _bookRepository.GetBookByTitle(titleOfBookToUpdate);
-
-    //    if (existingBook == null)
-    //    {
-    //        return (false, "Can't update book - doesn't exist");
-    //    }
-
-    //    // possibly put into own method - bookRepository.UpdateBook(titleOfBookToUpdate, updatedBook)
-    //    _bookRepository.RemoveBook(titleOfBookToUpdate);
-    //    _bookRepository.AddBook(updatedBookProperties.Author, updatedBookProperties.Title, updatedBookProperties.PublishYear);
-
-    //    // List<string> lines = _fileService.ReadLinesFromFile(filePath).ToList();
-    //    // var book = lines[bookIndex];
-    //    // var updatedBook = ChangeBookProperties(book);
-    //    // lines[bookIndex] = updatedBook;
-    //    //_fileService.WriteLinesToFile(lines, filePath);
-    //    return (true, null);
-    //}
 
     public (bool isSuccess, string message) AddBook(Book newBook)
     {
@@ -76,9 +42,23 @@ public class BookService(IBookRepository bookRepository) : IBookService
         throw new NotImplementedException();
     }
 
-    public void RemoveBook(string titleOfBookToRemove)
+    public (bool isSuccess, string? message) RemoveBook(string titleOfBookToRemove)
     {
-        throw new NotImplementedException();
+        var booksToFetch = _bookRepository.ReadDatabase();
+
+        if (booksToFetch == null)
+        {
+            return (false, "No books found in library");
+        }
+
+        var (isSuccess, message) = _bookRepository.RemoveBook(titleOfBookToRemove);
+
+        if (!isSuccess)
+        {
+            return (false, message);
+        }
+
+        return (true, message);
     }
 
     public (bool isSuccess, string? message, List<Book>? books) FetchBooks()

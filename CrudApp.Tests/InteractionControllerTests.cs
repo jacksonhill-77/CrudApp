@@ -37,50 +37,47 @@ public class InteractionControllerTests
         response.Should().Be((true, null));
     }
 
-    [Fact]
-    public void CanRemoveBook_WithSuccess()
-    {
-        // Setup
-        var testHelper = new TestHelper();
-        var fileService = new FileService();
-        var filePath = "mockpath";
-        var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-        var book1 = new Book()
-        {
-            Id = 1,
-            Title = "Book 1",
-            Author = "Author 1",
-            PublishYear = 1901,
-        };
+    //[Fact]
+    //public void CanRemoveBook_WithSuccess()
+    //{
+    //    // Setup
+    //    var testHelper = new TestHelper();
+    //    var book1 = new Book()
+    //    {
+    //        Id = 1,
+    //        Title = "Book 1",
+    //        Author = "Author 1",
+    //        PublishYear = 1901,
+    //    };
 
-        var book2 = new Book()
-        {
-            Id = 2,
-            Title = "Book 2",
-            Author = "Author 2",
-            PublishYear = 1902,
-        };
+    //    var book2 = new Book()
+    //    {
+    //        Id = 2,
+    //        Title = "Book 2",
+    //        Author = "Author 2",
+    //        PublishYear = 1902,
+    //    };
 
-        var books = new List<Book>
-        {   book1,
-            book2
-        };
+    //    var books = new List<Book>
+    //    {   book1,
+    //        book2
+    //    };
 
-        var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
-        var booksPostRemoval = booksPreRemoval
-            .Skip(1)
-            .ToList();
+    //    var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
+    //    var booksPostRemoval = booksPreRemoval
+    //        .Skip(1)
+    //        .ToList();
 
-        var sut = testHelper
-            .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
-            .CreateSut();
+    //    var sut = testHelper
+    //        .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
+    //        .CreateSut();
 
-        // Act
-        sut.RemoveBook(book1.Title);
+    //    // Act
+    //    sut.RemoveBook(book1.Title);
 
-        // Assert
-        testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
-    }
+    //    // Assert
+    //    testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
+    //}
 
     //[Fact]
     //public void CanUpdateBook_WithSuccess()
@@ -205,19 +202,19 @@ public class InteractionControllerTests
             return this;
         }
 
-        public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
-        {
-            _fileServiceMock
-                .Setup(x => x.ReadLinesFromFile(_filePath))
-                .Returns(booksPreRemoval);
+        //public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
+        //{
+        //    _fileServiceMock
+        //        .Setup(x => x.ReadLinesFromFile(_filePath))
+        //        .Returns(booksPreRemoval);
 
-            _fileServiceMock
-                .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
-                .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
-                .Returns((true, null));
+        //    _fileServiceMock
+        //        .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
+        //        .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
+        //        .Returns((true, null));
 
-            return this;
-        }
+        //    return this;
+        //}
 
         //public TestHelper SetupUpdateBook(List<string> booksPreUpdate, List<string> booksPostUpdate)
         //{
