@@ -100,8 +100,15 @@ public class InteractionController(IBookService bookService, IUserInputService u
             return (false, getBookTitleResult.message);
         }
 
-        _bookService.RemoveBook(getBookTitleResult.userInput);
-        return (true, null);
+        var (removeBookIsSuccess, removeBookMessage) = _bookService.RemoveBook(getBookTitleResult.userInput);
+
+        if (!removeBookIsSuccess)
+        {
+            Console.WriteLine(removeBookMessage);
+            return (false, removeBookMessage);
+        }
+
+        return (true, removeBookMessage);
     }
 
     public (bool isSuccess, string? message) UpdateBook()

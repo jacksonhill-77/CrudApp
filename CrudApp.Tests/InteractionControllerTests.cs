@@ -6,6 +6,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using System.Linq;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 
 namespace CrudApp.Tests;
 /// <summary>
@@ -37,47 +38,24 @@ public class InteractionControllerTests
         response.Should().Be((true, null));
     }
 
-    //[Fact]
-    //public void CanRemoveBook_WithSuccess()
-    //{
-    //    // Setup
-    //    var testHelper = new TestHelper();
-    //    var book1 = new Book()
-    //    {
-    //        Id = 1,
-    //        Title = "Book 1",
-    //        Author = "Author 1",
-    //        PublishYear = 1901,
-    //    };
+    [Fact]
+    public void CanRemoveBook_WithSuccess()
+    {
+        // Setup
+        var testHelper = new TestHelper();
+        var title = "New Title";
+        var message = "Book removed successfully";
 
-    //    var book2 = new Book()
-    //    {
-    //        Id = 2,
-    //        Title = "Book 2",
-    //        Author = "Author 2",
-    //        PublishYear = 1902,
-    //    };
+        var sut = testHelper
+            .SetupRemoveBook(title, message)
+            .CreateSut();
 
-    //    var books = new List<Book>
-    //    {   book1,
-    //        book2
-    //    };
+        // Act
+        var response = sut.RemoveBook();
 
-    //    var booksPreRemoval = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
-    //    var booksPostRemoval = booksPreRemoval
-    //        .Skip(1)
-    //        .ToList();
-
-    //    var sut = testHelper
-    //        .SetupRemoveBook(booksPreRemoval, booksPostRemoval)
-    //        .CreateSut();
-
-    //    // Act
-    //    sut.RemoveBook(book1.Title);
-
-    //    // Assert
-    //    testHelper._booksPostRemoval.Should().BeEquivalentTo(booksPostRemoval);
-    //}
+        // Assert
+        response.Should().Be((true, message));
+    }
 
     //[Fact]
     //public void CanUpdateBook_WithSuccess()
@@ -202,19 +180,18 @@ public class InteractionControllerTests
             return this;
         }
 
-        //public TestHelper SetupRemoveBook(List<string> booksPreRemoval, List<string> booksPostRemoval)
-        //{
-        //    _fileServiceMock
-        //        .Setup(x => x.ReadLinesFromFile(_filePath))
-        //        .Returns(booksPreRemoval);
+        public TestHelper SetupRemoveBook(string title, string message)
+        {
+            _userInputServiceMock
+                .Setup(x => x.GetUserInput(It.IsAny<string>()))
+                .Returns((null, title));
 
-        //    _fileServiceMock
-        //        .Setup(x => x.WriteLinesToFile(booksPostRemoval, _filePath))
-        //        .Callback<List<string>, string>((booksPostRemoval, filePath) => _booksPostRemoval = booksPostRemoval)
-        //        .Returns((true, null));
+            _bookServiceMock
+                .Setup(x => x.RemoveBook(title))
+                .Returns((true, message));
 
-        //    return this;
-        //}
+            return this;
+        }
 
         //public TestHelper SetupUpdateBook(List<string> booksPreUpdate, List<string> booksPostUpdate)
         //{
