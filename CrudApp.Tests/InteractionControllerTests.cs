@@ -7,6 +7,8 @@ using Moq;
 using Xunit;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using System.Security.Policy;
+using System;
 
 namespace CrudApp.Tests;
 /// <summary>
@@ -57,24 +59,31 @@ public class InteractionControllerTests
         response.Should().Be((true, message));
     }
 
-    //[Fact]
-    //public void CanUpdateBook_WithSuccess()
-    //{
-    //    // Setup
-    //    var testHelper = new TestHelper();
-    //    var title = "New Title";
-    //    var message = "Book removed successfully";
+    [Fact]
+    public void CanUpdateBook_WithSuccess()
+    {
+        // Setup
+        var testHelper = new TestHelper();
+        var title = "Existing title";
+        var message = "Book updated successfully";
+        var updatedBook = new Book()
+        {
+            Id = 0,
+            Title = "Updated Title",
+            Author = "Updated Author",
+            PublishYear = 1900,
+        };
 
-    //    var sut = testHelper
-    //        .SetupRemoveBook(title, message)
-    //        .CreateSut();
+        var sut = testHelper
+            .SetupUpdateBook(title, updatedBook, message)
+            .CreateSut();
 
-    //    // Act
-    //    var response = sut.RemoveBook();
+        // Act
+        var response = sut.UpdateBook();
 
-    //    // Assert
-    //    response.Should().Be((true, message));
-    //}
+        // Assert
+        response.Should().Be((true, message));
+    }
 
     //[Fact]
     //public void CanDisplayBooks_WithSuccess()
@@ -98,7 +107,7 @@ public class InteractionControllerTests
     class TestHelper
     {
         private readonly MockRepository _mockRepository = new MockRepository(MockBehavior.Strict);
-        readonly Mock<IBookService> _bookServiceMock;
+        public readonly Mock<IBookService> _bookServiceMock;
         readonly Mock<IUserInputService> _userInputServiceMock;
 
 
@@ -144,19 +153,34 @@ public class InteractionControllerTests
             return this;
         }
 
-        //public TestHelper SetupUpdateBook(List<string> booksPreUpdate, List<string> booksPostUpdate)
-        //{
-        //    _fileServiceMock
-        //        .Setup(x => x.ReadLinesFromFile(_filePath))
-        //        .Returns(booksPreUpdate);
+        public TestHelper SetupUpdateBook(string title, Book updatedBook, string message)
+        {
 
-        //    _fileServiceMock
-        //        .Setup(x => x.WriteLinesToFile(booksPostUpdate, _filePath))
-        //        .Callback<List<string>, string>((booksPostUpdate, filePath) => _booksPostUpdate = booksPostUpdate)
-        //        .Returns((true, null));
+            _userInputServiceMock
+                .Setup(x => x.GetUserInput(It.IsAny<string>()))
+                .Returns((null, title));
 
-        //    return this;
-        //}
+            _userInputServiceMock
+                .SetupSequence(x => x.GetUserInputLoop(It.IsAny<string>()))
+                .Returns((null, updatedBook.Title))
+                .Returns((null, updatedBook.Author));
+
+            _userInputServiceMock
+                .Setup(x => x.GetUserInputAsIntLoop(It.IsAny<string>()))
+                .Returns((null, updatedBook.PublishYear));
+
+            _bookServiceMock
+                .Setup(x => x.UpdateBook(
+                    It.IsAny<string>(),
+                    It.Is<Book>(b =>
+                        b.Title == updatedBook.Title &&
+                        b.Author == updatedBook.Author &&
+                        b.PublishYear == updatedBook.PublishYear
+                    )))
+                .Returns((true, message));
+
+            return this;
+        }
 
         //public TestHelper SetupReadDatabase(List<string> databaseBooks)
         //{
