@@ -115,7 +115,7 @@ public class BookServiceTests
         var response = sut.UpdateBook(newBook.Title, updatedBook);
 
         // Assert 
-        response.Should().Be((true, null, updatedBook));
+        response.Should().Be((true, null));
     }
 
     [Fact]

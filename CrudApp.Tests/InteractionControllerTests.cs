@@ -62,86 +62,37 @@ public class InteractionControllerTests
     //{
     //    // Setup
     //    var testHelper = new TestHelper();
-    //    var fileService = new FileService();
-    //    var filePath = "mockpath";
-    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-    //    var originalBook = new Book()
-    //    {
-    //        Id = 1,
-    //        Title = "Book 1",
-    //        Author = "Author 1",
-    //        PublishYear = 1901,
-    //    };
-
-    //    var updatedBook = new Book()
-    //    {
-    //        Id = 2,
-    //        Title = "Book 2",
-    //        Author = "Author 2",
-    //        PublishYear = 1902,
-    //    };
-
-    //    var originalBookJSON = new List<string>()
-    //    {
-    //        fileDbConnection.ConvertBookToJSON(originalBook)
-    //    };
-
-    //    var updatedBookJSON = new List<string>()
-    //    {
-    //        fileDbConnection.ConvertBookToJSON(updatedBook)
-    //    };
+    //    var title = "New Title";
+    //    var message = "Book removed successfully";
 
     //    var sut = testHelper
-    //        .SetupUpdateBook(originalBookJSON, updatedBookJSON)
+    //        .SetupRemoveBook(title, message)
     //        .CreateSut();
 
     //    // Act
-    //    sut.UpdateBook(originalBook.Title, updatedBook);
+    //    var response = sut.RemoveBook();
 
     //    // Assert
-    //    testHelper._booksPostUpdate.Should().BeEquivalentTo(updatedBookJSON);
+    //    response.Should().Be((true, message));
     //}
 
     //[Fact]
-    //public void CanReadDatabase_WithSuccess()
+    //public void CanDisplayBooks_WithSuccess()
     //{
     //    // Setup
     //    var testHelper = new TestHelper();
-    //    var fileService = new FileService();
-    //    var filePath = "mockpath";
-    //    var fileDbConnection = new FileDbConnection(new FileService(), filePath);
-    //    var book1 = new Book()
-    //    {
-    //        Id = 1,
-    //        Title = "Book 1",
-    //        Author = "Author 1",
-    //        PublishYear = 1901,
-    //    };
-
-    //    var book2 = new Book()
-    //    {
-    //        Id = 2,
-    //        Title = "Book 2",
-    //        Author = "Author 2",
-    //        PublishYear = 1902,
-    //    };
-
-    //    var books = new List<Book>
-    //    {   book1,
-    //        book2
-    //    };
-
-    //    var databaseBooks = books.ConvertAll(book => fileDbConnection.ConvertBookToJSON(book));
+    //    var title = "New Title";
+    //    var message = "Book removed successfully";
 
     //    var sut = testHelper
-    //        .SetupReadDatabase(databaseBooks)
+    //        .SetupRemoveBook(title, message)
     //        .CreateSut();
 
     //    // Act
-    //    var databaseReadResult = sut.ReadDatabase();
+    //    var response = sut.RemoveBook();
 
     //    // Assert
-    //    databaseReadResult.Should().BeEquivalentTo(books);
+    //    response.Should().Be((true, message));
     //}
 
     class TestHelper
